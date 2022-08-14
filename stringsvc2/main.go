@@ -7,12 +7,13 @@ import (
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log" // NB: we replace std log package with this one
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
 func main() {
+	// initialise all dependencies required for middleware chain
 	logger := log.NewLogfmtLogger(os.Stderr)
 
 	fieldKeys := []string{"method", "error"}
@@ -35,11 +36,16 @@ func main() {
 		Help:      "The result of each count method.",
 	}, []string{}) // no fields here
 
+	// service initialisation and middleware chain
 	var svc StringService
-	svc = stringService{}
-	svc = loggingMiddleware{logger, svc}
-	svc = instrumentingMiddleware{requestCount, requestLatency, countResult, svc}
+	svc = stringService{}                                                         // barebones service implementation - JUST business logic
+	svc = loggingMiddleware{logger, svc}                                          // chain middleare onto service to decorate service with logging
+	svc = instrumentingMiddleware{requestCount, requestLatency, countResult, svc} // chain more middleware onto updated service to decorate with prometheus observability
+	// notice onion effect of core service being built out to include additional services
+	// the updated service is passed into each middleware, thereby maintaining all added middleware and creating the onion
+	// refer to README for an explanation of how middleware adds logic
 
+	// handlers link endpoints to transport
 	uppercaseHandler := httptransport.NewServer(
 		makeUppercaseEndpoint(svc),
 		decodeUppercaseRequest,
@@ -52,9 +58,12 @@ func main() {
 		encodeResponse,
 	)
 
+	// router
 	http.Handle("/uppercase", uppercaseHandler)
 	http.Handle("/count", countHandler)
 	http.Handle("/metrics", promhttp.Handler())
 	logger.Log("msg", "HTTP", "addr", ":8080")
+
+	// serve
 	logger.Log("err", http.ListenAndServe(":8080", nil))
 }
