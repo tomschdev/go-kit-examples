@@ -13,7 +13,7 @@ This process is implemented by wrapping our concrete type in a new concrete type
 
 Middleware returns Endpoint returns Service \
 Service is resposible for executing business logic on inputs. \
-Endpoint is responsible for extracting fields from requests, feeding to service and returning response and error. \
+Endpoint is responsible for extracting fields from requests, feeding to service and returning response and error. An endpoint looks after the provisioning of a service's method. \
 Middleware is responsible for decorating endpoint with supplementary services by running additoinal logic and then diverting execution to endpoint. Additional logic is typically provided by a dependency i.e., logger, prometheus, authentication, etc. 
 
 ## Execution

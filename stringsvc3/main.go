@@ -44,10 +44,16 @@ func main() {
 		Name:      "count_result",
 		Help:      "The result of each count method.",
 	}, []string{})
+	// GoDoc on ServiceMiddleware:
+	// type ServiceMiddleware func(StringService) StringService
+	// ServiceMiddleware is a chainable behavior modifier for StringService.
 
+	// proxyingMiddleware returns a ServiceMiddleware
+	// ServiceMiddleware is a function, therefore can be invoked with (svc)
+	// and returns a StringService, therefore can assign its return to svc
 	var svc StringService
 	svc = stringService{}
-	svc = proxyingMiddleware(context.Background(), *proxy, logger)(svc)
+	svc = proxyingMiddleware(context.Background(), *proxy, logger)(svc) // similar to previous middleware, proxyingMiddleware configures an endpoint and returns a func that adds svc into a struct with the newly configured endpoint (and returns it) - that struct also implements Service interface
 	svc = loggingMiddleware(logger)(svc)
 	svc = instrumentingMiddleware(requestCount, requestLatency, countResult)(svc)
 
