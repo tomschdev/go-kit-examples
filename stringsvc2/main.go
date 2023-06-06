@@ -14,6 +14,7 @@ import (
 
 func main() {
 	// initialise all dependencies required for middleware chain
+	// just the main method in this file such that all focus is on control flow as opposed to abstraction effort
 	logger := log.NewLogfmtLogger(os.Stderr)
 
 	fieldKeys := []string{"method", "error"}
@@ -44,6 +45,8 @@ func main() {
 	// notice onion effect of core service being built out to include additional services
 	// the updated service is passed into each middleware, thereby maintaining all added middleware and creating the onion
 	// refer to README for an explanation of how middleware adds logic
+	// essentially, the middleware also comes in the form of an interface that lists the same methods as the service interface
+	// therefore, one can implement the middleware interface by adding the logic that necessitates the middleware interfacen and then calling the service interface's implementation of business logic
 
 	// handlers link endpoints to transport
 	uppercaseHandler := httptransport.NewServer(

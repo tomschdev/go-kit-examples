@@ -8,7 +8,7 @@ import (
 
 type loggingMiddleware struct {
 	logger log.Logger
-	next   StringService
+	next   StringService // the next naming convention is used to suggest that loggingMiddleware performs a preceding function before continuing to execute business logic
 }
 
 func (mw loggingMiddleware) Uppercase(s string) (output string, err error) {
